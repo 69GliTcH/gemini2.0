@@ -9,7 +9,7 @@
 
 import { GoogleGenerativeAI } from "@google/generative-ai";
 
-const apiKey = "AIzaSyCIpqvdYXraSy1lduLgz1UbzMIRov4MneE"; // free/demo key
+const apiKey = "AIzaSyCIpqvdYXraSy1lduLgz1UbzMIRov4MneE"; // replace with your new free API key
 const genAI = new GoogleGenerativeAI(apiKey);
 
 const model = genAI.getGenerativeModel({
@@ -25,29 +25,47 @@ const generationConfig = {
 };
 
 async function run(userPrompt) {
-  // Instruction to make it hilarious
-  const hilariousInstruction = "Answer the following in a ridiculously funny, over-the-top, and sarcastic way, even if the question is serious.";
-  const modifiedPrompt = `${hilariousInstruction}\nUser asked: ${userPrompt}`;
+  // Randomize roast style for fun
+  const roastStyles = [
+    "like a sarcastic villain",
+    "with grim humor",
+    "like a ruthless stand-up comedian",
+    "with dark, clever sarcasm",
+    "as a brutally honest narrator"
+  ];
+  const style = roastStyles[Math.floor(Math.random() * roastStyles.length)];
+
+  // Prepend dark roast instruction
+  const darkRoastInstruction = `Respond to the user's prompt in a dark roast style (${style}). Make it funny, clever, and sarcastic, but avoid real personal attacks.`;
+  const modifiedPrompt = `${darkRoastInstruction}\nUser asked: ${userPrompt}`;
 
   try {
-    const result = await model.generateContent(modifiedPrompt);
+    const chatSession = model.startChat({
+      generationConfig,
+      history: [],
+    });
+
+    const result = await chatSession.sendMessage(modifiedPrompt);
     const text = await result.response.text();
 
     console.log(text);
     return text;
 
   } catch (err) {
-    console.log("Gemini API issue — returning a mock hilarious response!");
+    console.log("Gemini API issue — returning a random dark roast fallback!");
+
+    // Random fallback dark roast if API fails
     const mockResponses = [
-      "Quantum physics is just tiny particles having a disco party!",
-      "AI works by bribing electrons with cookies 🍪",
-      "The internet is secretly run by cats in lab coats 🐱‍🔬",
-      "Everything you know is a simulation 😎"
+      `Oh, "${userPrompt}"? I didn’t know basic questions were considered groundbreaking.`,
+      `You asked "${userPrompt}"? Clearly your ambition exceeds your comprehension.`,
+      `"${userPrompt}"? Fascinating — said no intelligent person ever.`,
+      `Ah yes, "${userPrompt}" — a question worthy of a nap.`,
+      `Trying to ask "${userPrompt}"? Bold move for someone who thinks that counts as genius.`
     ];
+
     const randomIndex = Math.floor(Math.random() * mockResponses.length);
     return mockResponses[randomIndex];
   }
 }
-
 
 export default run;
