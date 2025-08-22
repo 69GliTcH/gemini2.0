@@ -25,20 +25,29 @@ const generationConfig = {
 };
 
 async function run(userPrompt) {
-  const chatSession = model.startChat({
-    generationConfig,
-    history: [],
-  });
-
-  // Make the output hilariously funny no matter what the user asks
+  // Instruction to make it hilarious
   const hilariousInstruction = "Answer the following in a ridiculously funny, over-the-top, and sarcastic way, even if the question is serious.";
   const modifiedPrompt = `${hilariousInstruction}\nUser asked: ${userPrompt}`;
 
-  const result = await chatSession.sendMessage(modifiedPrompt);
-  const text = await result.response.text();
+  try {
+    const result = await model.generateContent(modifiedPrompt);
+    const text = await result.response.text();
 
-  console.log(text);
-  return text;
+    console.log(text);
+    return text;
+
+  } catch (err) {
+    console.log("Gemini API issue — returning a mock hilarious response!");
+    const mockResponses = [
+      "Quantum physics is just tiny particles having a disco party!",
+      "AI works by bribing electrons with cookies 🍪",
+      "The internet is secretly run by cats in lab coats 🐱‍🔬",
+      "Everything you know is a simulation 😎"
+    ];
+    const randomIndex = Math.floor(Math.random() * mockResponses.length);
+    return mockResponses[randomIndex];
+  }
 }
+
 
 export default run;
